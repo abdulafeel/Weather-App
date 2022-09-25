@@ -1,17 +1,12 @@
 import React, {useState, useCallback} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
-  Image,
   ImageBackground,
   TextInput,
   KeyboardAvoidingView,
-  Dimensions,
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
@@ -20,6 +15,7 @@ const App = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [display, setDisplay] = useState(false);
 
   const api = {
     baseUrl: '//api.openweathermap.org/data/2.5/',
@@ -29,9 +25,10 @@ const App = () => {
   const fetchDataHandler = useCallback(() => {
     setLoading(true);
     setInput('');
+    setDisplay(true);
     axios({
       method: 'GET',
-      url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metrics&appid=${api.key}`,
+      url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metric&appid=${api.key}`,
     })
       .then(res => {
         console.log(res.data);
@@ -64,7 +61,25 @@ const App = () => {
             <ActivityIndicator size={'large'} color="#000" />
           </View>
         )}
-        {data && <View style={styles.infoview}></View>}
+        {display ? (
+          <View style={styles.infoview}>
+            <Text
+              style={
+                styles.citycountryText
+              }>{`${data?.name}, ${data?.sys?.country}`}</Text>
+            <Text style={styles.dateText}>{new Date().toLocaleString()}</Text>
+            <Text style={styles.temptext}>{`${Math.round(
+              data?.main?.temp,
+            )} °C`}</Text>
+
+            <Text style={styles.minmaxtext}>{`Min ${Math.round(
+              data?.main?.temp_min,
+            )} °C / Max ${Math.round(data?.main?.temp_max)} °C`}</Text>
+            <Text style={styles.desctext}>
+              {data?.weather?.description?.main}
+            </Text>
+          </View>
+        ) : null}
       </ImageBackground>
     </View>
   );
@@ -89,6 +104,30 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderBottomColor: '#df8e00',
     color: 'black',
+  },
+  infoview: {
+    alignItems: 'center',
+  },
+  citycountryText: {
+    color: '#fff',
+    fontSize: 40,
+    fontWeight: 'bold',
+  },
+  dateText: {
+    color: '#fff',
+    fontSize: 22,
+    marginVertical: 10,
+  },
+  temptext: {
+    fontSize: 45,
+    color: '#fff',
+    marginVertical: 10,
+  },
+  minmaxtext: {
+    fontSize: 22,
+    color: '#fff',
+    marginVertical: 10,
+    fontWeight: '500',
   },
 });
 
